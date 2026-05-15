@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Sensitive scripts
+scripts/hash-password.js
+
+# User uploads
+public/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Conversation backup (if you don't want it in git)
+Conversation.txt
+calhost

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  
+  <!-- Static SEO Meta Tags (same for all languages – safe) -->
+  <title>ChadRental | Apartments for Rent in Chad</title>
+  <meta name="description" content="Find the best apartments, houses, and short-stay rentals across Chad. Trusted by expats, NGOs, and travelers.">
+  <meta name="keywords" content="apartments Chad, rental Chad, N'Djamena accommodation, expat rentals Chad">
+  <meta name="author" content="ChadRental">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook (static) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chadrental.com/">
+  <meta property="og:title" content="ChadRental | Apartments for Rent in Chad">
+  <meta property="og:description" content="Find the best apartments, houses, and short-stay rentals across Chad.">
+  <meta property="og:image" content="https://chadrental.com/images/og-image.jpg">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://chadrental.com/">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+</head>
+<body>
+
+<header class="main-header">
+  <div class="header-container">
+    <div class="logo">
+      <i class="fas fa-home"></i> Chad<span style="font-weight:400">Rental</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" data-i18n="home">Home</a>
+      <a href="/contact.html" class="contact-nav" data-i18n="contact_nav">List your property</a>
+      <div class="language-switcher">
+        <button onclick="i18n.setLanguage('en')">EN</button>
+        <button onclick="i18n.setLanguage('fr')">FR</button>
+        <button onclick="i18n.setLanguage('ar')">AR</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-content">
+    <h1 data-i18n="title"><i class="fas fa-home"></i> Find Your Home Across Chad</h1>
+    <p data-i18n="subtitle">Monthly rentals & short stays – from N'Djamena to Moundou and beyond</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="filter-card">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label data-i18n="neighborhood"><i class="fas fa-map-marker-alt"></i> City / Neighborhood</label>
+        <select id="neighborhoodFilter">
+          <option value="" data-i18n="all_neighborhoods">All locations</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label data-i18n="features"><i class="fas fa-couch"></i> Features</label>
+        <div id="featuresFilter" class="features-list"></div>
+      </div>
+      <div class="filter-group">
+        <label data-i18n="monthly_rent"><i class="fas fa-dollar-sign"></i> Monthly Rent</label>
+        <select id="priceFilter">
+          <option value="" data-i18n="any_price">Any price</option>
+          <option value="Under $500">Under $500</option>
+          <option value="$500–$1000">$500 – $1000</option>
+          <option value="$1000+">$1000+</option>
+        </select>
+      </div>
+      <div>
+        <button id="searchBtn" class="btn-primary"><i class="fas fa-search"></i> <span data-i18n="search">Apply</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultCount" class="result-count"></div>
+  <div id="apartmentsList" class="apartments-grid"></div>
+  <div id="loadingSpinner" class="spinner hidden"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="loading">Loading...</span></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 ChadRental. Your trusted guide to rentals across Chad.</p>
+  </div>
+</footer>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/apartments.js"></script>
+</body>
+</html>

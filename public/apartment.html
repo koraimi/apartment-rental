@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Static SEO Meta Tags -->
+  <title>ChadRental | Apartment Details</title>
+  <meta name="description" content="View detailed information about this apartment in Chad. See photos, amenities, monthly rent, location map, and contact the landlord directly.">
+  <meta name="keywords" content="apartment Chad, rental Chad, Chad apartment details">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chadrental.com/apartment.html">
+  <meta property="og:title" content="ChadRental | Apartment Details">
+  <meta property="og:description" content="View detailed information about this apartment in Chad.">
+  <meta property="og:image" content="https://chadrental.com/images/og-image.jpg">
+  
+  <!-- Canonical -->
+  <link rel="canonical" href="https://chadrental.com/apartment.html">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="/leaflet/leaflet.css">
+  <script src="/leaflet/leaflet.js"></script>
+</head>
+<body>
+
+<header class="main-header">
+  <div class="header-container">
+    <div class="logo"><i class="fas fa-home"></i> Chad<span style="font-weight:400">Rental</span></div>
+    <div class="nav-links">
+      <a href="/" data-i18n="home">Home</a>
+      <div class="language-switcher">
+        <button onclick="i18n.setLanguage('en')">EN</button>
+        <button onclick="i18n.setLanguage('fr')">FR</button>
+        <button onclick="i18n.setLanguage('ar')">AR</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <a href="/" class="btn-back" data-i18n="back_to_listings">← Back to listings</a>
+  <div id="apartmentDetail" class="detail-container"></div>
+  <div class="detail-container">
+    <h2 data-i18n="location"><i class="fas fa-map-marked-alt"></i> Location</h2>
+    <div id="map" class="map-container"></div>
+  </div>
+  <div id="inquirySection" style="display: none;"></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 ChadRental – Find your home across Chad</p>
+  </div>
+</footer>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/apartment-detail.js"></script>
+</body>
+</html>

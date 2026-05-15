@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listing Requests | Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+</head>
+<body class="admin-body">
+  <div class="container" style="max-width: 1200px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0;">
+      <h1><i class="fas fa-home" style="color: #1e6f5c;"></i> Property Listing Requests</h1>
+      <a href="/admin/dashboard.html" class="admin-btn admin-btn-outline">← Back to Dashboard</a>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-header"><h2>All Requests (Newest First)</h2></div>
+      <div id="requestsTable" style="padding: 1rem; overflow-x: auto;">
+        <div class="text-center py-10 text-gray-500">Loading requests...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('adminToken');
+    
+    if (!token) {
+      alert('No token found. Please login first.');
+      window.location.href = '/admin/login.html';
+    }
+    
+    async function loadRequests() {
+      const container = document.getElementById('requestsTable');
+      container.innerHTML = '<div class="text-center py-10 text-gray-500">Loading requests...</div>';
+      
+      try {
+        const response = await fetch('/admin/listing-requests', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const requests = await response.json();
+        
+        if (!requests || requests.length === 0) {
+          container.innerHTML = '<div class="text-center py-10">No listing requests yet. Ask someone to fill the "List your property" form.</div>';
+          return;
+        }
+        
+        let html = `
+          <table class="admin-table">
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Type</th><th>Message</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+        `;
+        
+        requests.forEach(r => {
+          html += `
+            <tr>
+              <td>${r.id}</td>
+              <td>${escapeHtml(r.name)}</td>
+              <td>${escapeHtml(r.email)}</td>
+              <td>${escapeHtml(r.phone || '—')}</td>
+              <td>${escapeHtml(r.address || '—')}</td>
+              <td>${escapeHtml(r.listing_type || '—')}</td>
+              <td>${escapeHtml(r.message ? r.message.substring(0, 100) : '—')}${r.message && r.message.length > 100 ? '…' : ''}</td>
+              <td>${r.is_processed ? '✅ Processed' : '⏳ New'}</td>
+              <td>${!r.is_processed ? `<button onclick="markProcessed(${r.id})" class="bg-green-500 text-white px-2 py-1 rounded" style="border:none; cursor:pointer;">Mark Processed</button>` : '—'}</td>
+            </tr>
+          `;
+        });
+        
+        html += `
+            </tbody>
+          </table>
+        `;
+        container.innerHTML = html;
+      } catch (err) {
+        console.error('Error loading requests:', err);
+        container.innerHTML = `<div class="text-center py-10 text-red-500">Error loading requests: ${err.message}</div>`;
+      }
+    }
+    
+    async function markProcessed(id) {
+      if (!confirm('Mark this request as processed?')) return;
+      
+      try {
+        const response = await fetch(`/admin/listing-requests/${id}/process`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          loadRequests(); // refresh
+        } else {
+          alert('Failed to mark as processed.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+    
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+    
+    loadRequests();
+  </script>
+</body>
+</html>

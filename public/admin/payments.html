@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments | Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+</head>
+<body class="admin-body">
+  <div class="container" style="max-width: 1200px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0;">
+      <h1><i class="fas fa-credit-card" style="color: #1e6f5c;"></i> Payment History</h1>
+      <a href="/admin/dashboard.html" class="admin-btn admin-btn-outline">← Back to Dashboard</a>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-header"><h2>Featured Listing Payments</h2></div>
+      <div id="paymentsTable" style="padding: 1rem; overflow-x: auto;">
+        <div class="text-center py-10 text-gray-500">Loading payments...</div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/admin.js"></script>
+  <script>
+    async function loadPayments() {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch('/admin/payments', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const payments = await res.json();
+        if (payments.length === 0) {
+          document.getElementById('paymentsTable').innerHTML = '<div class="text-center py-10">No payments recorded yet.</div>';
+          return;
+        }
+        let html = '<table class="admin-table"><thead><tr><th>Property</th><th>Amount</th><th>Duration</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+        payments.forEach(p => {
+          html += `<tr>
+            <td>${escapeHtml(p.apartment_name)}</td>
+            <td>$${p.amount}</td>
+            <td>${p.duration_months} month(s)</td>
+            <td><span class="badge ${p.status === 'completed' ? 'badge-success' : 'badge-warning'}">${p.status}</span></td>
+            <td>${new Date(p.created_at).toLocaleDateString()}</td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('paymentsTable').innerHTML = html;
+      }
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m));
+    }
+    loadPayments();
+  </script>
+</body>
+</html>

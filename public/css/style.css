@@ -1,0 +1,871 @@
+/* ============================================
+   APARTMENT RENTAL - MODERN CREATIVE UI
+   Distinct from hotel listing
+   ============================================ */
+
+/* ---------- RESET & BASE ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  background: linear-gradient(145deg, #f5f7fc 0%, #eef2f6 100%);
+  color: #1e2f3e;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ---------- TYPOGRAPHY & LINKS ---------- */
+h1, h2, h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+a {
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+/* ---------- HEADER & NAVIGATION (no hero) ---------- */
+.main-header {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e3c72, #2b5876);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.logo i {
+  background: none;
+  color: #2b5876;
+  margin-right: 6px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+  color: #1e6f5c;
+}
+
+.contact-nav {
+  background: #1e6f5c;
+  color: white !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 40px;
+  transition: 0.2s;
+}
+
+.contact-nav:hover {
+  background: #0f4c3f;
+  transform: scale(1.02);
+}
+
+.language-switcher {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.7);
+  padding: 0.3rem 0.7rem;
+  border-radius: 40px;
+  backdrop-filter: blur(4px);
+}
+
+.language-switcher button {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 30px;
+  transition: 0.2s;
+}
+
+.language-switcher button:hover {
+  background: #e2e8f0;
+}
+
+/* ---------- HERO SECTION (modern gradient wave) ---------- */
+.hero-section {
+  background: linear-gradient(125deg, #1e3c72 0%, #2b5876 50%, #4e4376 100%);
+  color: white;
+  padding: 4rem 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  opacity: 0.92;
+}
+
+/* ---------- FILTERS CARD (glassmorphism) ---------- */
+.filter-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 2rem;
+  padding: 1.8rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 160px;
+}
+
+.filter-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1e3c72;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group select, .filter-group input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 1.5rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+
+.filter-group select:focus, .filter-group input:focus {
+  outline: none;
+  border-color: #1e6f5c;
+  box-shadow: 0 0 0 3px rgba(30,111,92,0.2);
+}
+
+.features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.feature-label {
+  background: #eef2f6;
+  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.feature-label.selected {
+  background: #1e6f5c;
+  color: white;
+  box-shadow: 0 2px 8px rgba(30,111,92,0.3);
+}
+
+.feature-checkbox {
+  display: none;
+}
+
+.btn-primary {
+  background: linear-gradient(105deg, #1e6f5c, #289672);
+  border: none;
+  padding: 0.7rem 1.8rem;
+  border-radius: 2rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(30,111,92,0.3);
+}
+
+/* ---------- APARTMENT CARDS (modern, elevated) ---------- */
+.apartments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.apartment-card {
+  background: white;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.apartment-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 28px 36px -18px rgba(0, 0, 0, 0.2);
+}
+
+.apartment-image {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: #d9e2ec;
+}
+
+.apartment-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.apartment-card:hover .apartment-image img {
+  transform: scale(1.05);
+}
+
+.featured-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #f4c542;
+  color: #2c2c2c;
+  padding: 0.25rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.apartment-info {
+  padding: 1.2rem 1.2rem 1.5rem;
+}
+
+.apartment-info h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: #1e2f3e;
+}
+
+.location {
+  color: #5a6e7c;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.rent {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e6f5c;
+  margin: 0.8rem 0;
+}
+
+.contact-buttons {
+  display: flex;
+  gap: 0.7rem;
+  margin: 1rem 0;
+}
+
+.btn-whatsapp, .btn-email, .btn-book {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 2rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-whatsapp {
+  background: #25d366;
+  color: white;
+}
+
+.btn-whatsapp:hover {
+  background: #128C7E;
+}
+
+.btn-email {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-email:hover {
+  background: #2563eb;
+}
+
+.btn-book {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btn-book:hover {
+  background: #7c3aed;
+}
+
+.btn-details {
+  display: block;
+  text-align: center;
+  margin-top: 0.8rem;
+  padding: 0.6rem;
+  border-radius: 2rem;
+  background: #f0f4f9;
+  color: #1e3c72;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-details:hover {
+  background: #e2e8f0;
+  color: #0f4c3f;
+}
+
+/* ---------- RESULT COUNT & FEEDBACK ---------- */
+.result-count {
+  background: rgba(30,111,92,0.1);
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.filter-feedback {
+  margin: 1rem 0;
+}
+
+.filter-feedback-content {
+  background: #eef2ff;
+  border-radius: 2rem;
+  padding: 0.7rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.apply-filters-btn {
+  background: #1e6f5c;
+  color: white;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+/* ---------- DETAIL PAGE (apartment) ---------- */
+.detail-container {
+  background: white;
+  border-radius: 2rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.apartment-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.apartment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: #5a6e7c;
+  border-bottom: 1px solid #eef2f6;
+  padding-bottom: 0.8rem;
+}
+
+.action-section {
+  margin: 1.5rem 0;
+}
+
+.btn-primary-action.large {
+  display: inline-block;
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
+  border-radius: 3rem;
+  background: #1e6f5c;
+  color: white;
+  font-weight: 600;
+}
+
+.features-list-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 1rem 0;
+}
+
+.feature-item {
+  background: #eef2f6;
+  padding: 0.3rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.gallery-item {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Inquiry form */
+.inquiry-container {
+  background: #f8fafc;
+  border-radius: 2rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.inquiry-container h2 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.inquiry-container input, .inquiry-container textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 1.2rem;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.btn-submit {
+  background: #1e6f5c;
+  color: white;
+  border: none;
+  padding: 0.8rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Map */
+.map-container {
+  height: 280px;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+/* ---------- FOOTER ---------- */
+.footer {
+  background: #1e2f3e;
+  color: #a0b8c5;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 3rem;
+  font-size: 0.85rem;
+}
+
+/* ---------- RTL & RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .header-container {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+  }
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  .filter-row {
+    flex-direction: column;
+  }
+  .apartments-grid {
+    grid-template-columns: 1fr;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .contact-buttons {
+    flex-direction: column;
+  }
+}
+
+/* ---------- UTILITIES ---------- */
+.spinner {
+  text-align: center;
+  padding: 2rem;
+}
+.spinner.hidden {
+  display: none;
+}
+.error-message, .no-results {
+  text-align: center;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 2rem;
+  margin: 2rem 0;
+}
+.lightbox-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.lightbox-image {
+  max-width: 95%;
+  max-height: 95%;
+}
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: white;
+  font-size: 2.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* ============================================
+   ADMIN PAGES – MODERN & PROFESSIONAL
+   ============================================ */
+
+.admin-body {
+  background: linear-gradient(145deg, #eef2f5 0%, #e2e8f0 100%);
+  min-height: 100vh;
+}
+
+.admin-card {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.admin-card-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #edf2f7;
+  background: #fafcff;
+}
+
+.admin-card-header h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1a3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.9rem 1rem;
+  background: #f8fafc;
+  font-weight: 600;
+  color: #1e3c72;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #ecf3f9;
+  color: #2d3e50;
+  vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card .stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e6f5c;
+}
+
+.stat-card .stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #5a6e7c;
+  margin-top: 0.3rem;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.admin-form-group {
+  margin-bottom: 1rem;
+}
+
+.admin-form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+  color: #2c3e50;
+}
+
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus,
+.admin-form-group textarea:focus {
+  outline: none;
+  border-color: #1e6f5c;
+  box-shadow: 0 0 0 3px rgba(30,111,92,0.2);
+}
+
+.admin-btn {
+  background: #1e6f5c;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 2rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-btn:hover {
+  background: #0f4c3f;
+  transform: translateY(-2px);
+}
+
+.admin-btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #2c3e50;
+}
+
+.admin-btn-outline:hover {
+  background: #f1f5f9;
+  transform: none;
+}
+
+.admin-login-box {
+  max-width: 420px;
+  margin: 3rem auto;
+  background: white;
+  border-radius: 2rem;
+  padding: 2rem;
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 640px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-table {
+    font-size: 0.75rem;
+  }
+  .admin-table th, .admin-table td {
+    padding: 0.5rem;
+  }
+}
+
+/* Responsive admin buttons */
+@media (max-width: 768px) {
+  .admin-btn, .admin-btn-outline {
+    display: inline-block;
+    width: 100%;
+    margin: 0.3rem 0;
+    text-align: center;
+  }
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+  .admin-card-header h2 {
+    font-size: 1.2rem;
+  }
+  .admin-table th, .admin-table td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make button container wrap on mobile */
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 640px) {
+  .admin-actions {
+    flex-direction: column;
+  }
+  .admin-actions .admin-btn,
+  .admin-actions .admin-btn-outline {
+    width: 100%;
+    text-align: center;
+    margin-left: 0 !important;
+  }
+}
+
+/* Prevent map from overlapping header and other content */
+.map-container {
+  position: relative;
+  z-index: 1;
+  height: 280px; /* keep your existing height */
+  margin: 1rem 0;
+  overflow: hidden;
+  clear: both;
+}
+
+.leaflet-container {
+  z-index: 1;
+  background: #f8f8f8;
+}
+
+/* Ensure header stays above map when scrolling */
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* All detail containers should be above map if needed */
+.detail-container {
+  position: relative;
+  z-index: 2;
+}

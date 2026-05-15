@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List your property | ChadRental</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+</head>
+<body>
+
+<header class="main-header">
+  <div class="header-container">
+    <div class="logo"><i class="fas fa-home"></i> Chad<span style="font-weight:400">Rental</span></div>
+    <div class="nav-links">
+      <a href="/" data-i18n="home">Home</a>
+      <div class="language-switcher">
+        <button onclick="i18n.setLanguage('en')">EN</button>
+        <button onclick="i18n.setLanguage('fr')">FR</button>
+        <button onclick="i18n.setLanguage('ar')">AR</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container" style="max-width: 900px; margin: 2rem auto;">
+  <div class="filter-card" style="padding: 2rem;">
+    <h2 data-i18n="contact_title" style="margin-bottom: 1rem;">📢 List your property</h2>
+    <p data-i18n="contact_subtitle">Reach thousands of potential tenants. Fill out the form and we'll contact you within 24h.</p>
+    <form id="contactForm" style="margin-top: 1.5rem;">
+      <div class="filter-group" style="margin-bottom: 1rem;">
+        <label data-i18n="contact_name_label">Your name *</label>
+        <input type="text" id="contactName" data-i18n-placeholder="contact_name_placeholder" placeholder="Your name" required>
+      </div>
+      <div class="filter-group" style="margin-bottom: 1rem;">
+        <label data-i18n="contact_email_label">Email *</label>
+        <input type="email" id="contactEmail" data-i18n-placeholder="contact_email_placeholder" placeholder="Your email" required>
+      </div>
+      <div class="filter-group" style="margin-bottom: 1rem;">
+        <label data-i18n="contact_phone_label">Phone *</label>
+        <input type="tel" id="contactPhone" data-i18n-placeholder="contact_phone_placeholder" placeholder="Your phone number" required>
+      </div>
+      <div class="filter-group" style="margin-bottom: 1rem;">
+        <label data-i18n="contact_address_label">Property address / neighborhood</label>
+        <input type="text" id="contactAddress" data-i18n-placeholder="contact_address_placeholder" placeholder="e.g., Chagoua, N'Djamena">
+      </div>
+      <div class="filter-group" style="margin-bottom: 1rem;">
+        <label data-i18n="contact_type_label">Listing type</label>
+        <select id="contactType">
+          <option value="rental" data-i18n="contact_type_rental">Long-term rental</option>
+          <option value="affiliate" data-i18n="contact_type_affiliate">Short-stay / affiliate</option>
+          <option value="both" data-i18n="contact_type_both">Both</option>
+        </select>
+      </div>
+      <div class="filter-group" style="margin-bottom: 1rem;">
+        <label data-i18n="contact_message_label">Message</label>
+        <textarea id="contactMessage" rows="4" data-i18n-placeholder="contact_message_placeholder" placeholder="Tell us about your property..."></textarea>
+      </div>
+      <div id="formStatus" class="form-status"></div>
+      <button type="submit" class="btn-primary" data-i18n="contact_submit">Send request</button>
+    </form>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 ChadRental – Your home across Chad</p>
+  </div>
+</footer>
+
+<script src="/js/i18n.js"></script>
+<script>
+  // Contact form handling
+  document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    
+    if (!contactForm) {
+      console.error('Contact form not found!');
+      return;
+    }
+    
+    // Function to update placeholders when language changes
+    function updatePlaceholders() {
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (key && i18n.t) {
+          el.placeholder = i18n.t(key);
+        }
+      });
+    }
+    
+    // Initial placeholder update
+    updatePlaceholders();
+    
+    // Update placeholders when language changes
+    window.addEventListener('languageChanged', function() {
+      updatePlaceholders();
+    });
+    
+    contactForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const statusDiv = document.getElementById('formStatus');
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      
+      const formData = {
+        name: document.getElementById('contactName').value.trim(),
+        email: document.getElementById('contactEmail').value.trim(),
+        phone: document.getElementById('contactPhone').value.trim(),
+        address: document.getElementById('contactAddress').value.trim(),
+        type: document.getElementById('contactType').value,
+        message: document.getElementById('contactMessage').value.trim()
+      };
+      
+      // Validation
+      if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+        if (statusDiv) {
+          statusDiv.innerHTML = '<div class="alert alert-error">' + (i18n.t ? i18n.t('contact_fill_all', 'Please fill in all required fields.') : 'Please fill in all required fields.') + '</div>';
+        }
+        return;
+      }
+      
+      if (!formData.email.includes('@')) {
+        if (statusDiv) {
+          statusDiv.innerHTML = '<div class="alert alert-error">' + (i18n.t ? i18n.t('contact_valid_email', 'Please enter a valid email address.') : 'Please enter a valid email address.') + '</div>';
+        }
+        return;
+      }
+      
+      // Disable button and show loading
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = i18n.t ? i18n.t('contact_sending', 'Sending...') : 'Sending...';
+      }
+      
+      if (statusDiv) {
+        statusDiv.innerHTML = '<div class="alert alert-info">' + (i18n.t ? i18n.t('contact_sending_message', 'Sending your request...') : 'Sending your request...') + '</div>';
+      }
+      
+      try {
+        const response = await fetch('/api/contact-owner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          if (statusDiv) {
+            statusDiv.innerHTML = '<div class="alert alert-success">✅ ' + (i18n.t ? i18n.t('contact_success', 'Request sent! We\'ll contact you soon.') : 'Request sent! We\'ll contact you soon.') + '</div>';
+          }
+          contactForm.reset();
+        } else {
+          if (statusDiv) {
+            statusDiv.innerHTML = '<div class="alert alert-error">❌ ' + (result.error || (i18n.t ? i18n.t('contact_error', 'Error. Please try again.') : 'Error. Please try again.')) + '</div>';
+          }
+        }
+      } catch (error) {
+        console.error('Contact form error:', error);
+        if (statusDiv) {
+          statusDiv.innerHTML = '<div class="alert alert-error">❌ ' + (i18n.t ? i18n.t('contact_error', 'Network error. Please try again.') : 'Network error. Please try again.') + '</div>';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = i18n.t ? i18n.t('contact_submit', 'Send request') : 'Send request';
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Apartments</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+</head>
+<body class="admin-body">
+  <div class="container" style="max-width: 1300px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 2rem;">
+<h1 style="font-size: 1.8rem;"><i class="fas fa-home" style="color: #1e6f5c;"></i> ChadRental Admin</h1>
+      <button id="logoutBtn" class="admin-btn admin-btn-outline">Logout</button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="admin-stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-number" id="totalCount">0</div>
+        <div class="stat-label">Total Properties</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="rentalCount">0</div>
+        <div class="stat-label">Rentals</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="affiliateCount">0</div>
+        <div class="stat-label">Affiliate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="featuredCount">0</div>
+        <div class="stat-label">Featured</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="inquiryCount">0</div>
+        <div class="stat-label">Unread Inquiries</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="admin-actions">
+      <button id="addApartmentBtn" class="admin-btn">
+        <i class="fas fa-plus"></i> Add New Property
+      </button>
+      <a href="/admin/payments.html" class="admin-btn admin-btn-outline">
+        <i class="fas fa-credit-card"></i> Payments
+      </a>
+      <a href="/admin/listing-requests.html" class="admin-btn admin-btn-outline">
+        <i class="fas fa-list"></i> Listing Requests
+      </a>
+    </div>
+
+    <!-- Properties Table -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2><i class="fas fa-list"></i> Manage Properties</h2>
+      </div>
+      <div style="overflow-x: auto;">
+        <div id="propertiesTable" style="padding: 0 1rem 1rem;">
+          <div class="text-center py-10 text-gray-500">Loading properties...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inquiries Table -->
+    <div class="admin-card" style="margin-top: 2rem;">
+      <div class="admin-card-header">
+        <h2><i class="fas fa-envelope"></i> Landlord Inquiries</h2>
+      </div>
+      <div style="overflow-x: auto;">
+        <div id="inquiriesTable" style="padding: 0 1rem 1rem;">
+          <div class="text-center py-10 text-gray-500">Loading inquiries...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

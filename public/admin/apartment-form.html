@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Form | Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+</head>
+<body class="admin-body">
+  <div class="container" style="max-width: 1000px;">
+    <div style="margin: 2rem 0 1rem;">
+      <a href="/admin/dashboard.html" style="color: #1e6f5c;"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2 id="formTitle"><i class="fas fa-home"></i> Add / Edit Property</h2>
+      </div>
+      <div style="padding: 1.5rem;">
+        <form id="propertyForm">
+          <input type="hidden" id="apartmentId">
+          <div class="admin-form-grid">
+            <div class="admin-form-group"><label>Property Name *</label><input id="name" required></div>
+            <div class="admin-form-group"><label>Neighborhood *</label><input id="neighborhood" required></div>
+            <div class="admin-form-group"><label>Address</label><input id="address"></div>
+            <div class="admin-form-group"><label>Phone</label><input id="phone"></div>
+            <div class="admin-form-group"><label>WhatsApp</label><input id="whatsapp"></div>
+            <div class="admin-form-group"><label>Email</label><input id="email" type="email"></div>
+            <div class="admin-form-group"><label>Monthly Rent *</label>
+              <select id="monthly_rent" required>
+                <option value="">Select</option>
+                <option>Under $500</option>
+                <option>$500–$1000</option>
+                <option>$1000+</option>
+              </select>
+            </div>
+            <div class="admin-form-group"><label>Listing Type *</label>
+              <select id="listing_type">
+                <option value="rental">🏡 Rental (Contact Landlord)</option>
+                <option value="affiliate">⭐ Affiliate (External Booking)</option>
+              </select>
+            </div>
+            <div id="rentalFields" class="admin-form-group" style="display: none;">
+              <label>Landlord WhatsApp</label><input id="landlord_whatsapp" placeholder="+235 XX XX XX XX">
+              <label style="margin-top: 0.5rem;">Landlord Email</label><input id="landlord_email" type="email">
+            </div>
+            <div id="affiliateFields" class="admin-form-group" style="display: none;">
+              <label>External Booking URL *</label><input id="external_booking_url" placeholder="https://www.booking.com/...">
+            </div>
+            
+            <!-- Description fields -->
+            <div class="admin-form-group"><label>Description (English)</label><textarea id="description" rows="3"></textarea></div>
+            <div class="admin-form-group"><label>Description (Français)</label><textarea id="description_fr" rows="3"></textarea></div>
+            <div class="admin-form-group"><label>الوصف (العربية)</label><textarea id="description_ar" rows="3"></textarea></div>
+            
+            <div class="admin-form-group"><label>Latitude</label><input id="latitude" step="any" placeholder="e.g., 12.1348"></div>
+            <div class="admin-form-group"><label>Longitude</label><input id="longitude" step="any" placeholder="e.g., 15.0557"></div>
+            <div class="admin-form-group"><label>Features</label><div id="featuresCheckboxes" class="features-list"></div></div>
+          </div>
+
+          <!-- Photo Upload Section - ALWAYS VISIBLE -->
+          <div id="photoUploadSection" style="margin-top: 1.5rem;">
+            <label>Upload Photos</label>
+            <input type="file" id="photoUpload" accept="image/*" multiple>
+            <p class="text-xs text-gray-500 mt-1">You can select multiple images. Max 5MB each.</p>
+            <div id="existingPhotos" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.8rem;"></div>
+          </div>
+
+          <div style="margin-top: 2rem;">
+            <button type="submit" class="admin-btn">Save Property</button>
+            <a href="/admin/dashboard.html" class="admin-btn admin-btn-outline" style="margin-left: 1rem;">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    const listingType = document.getElementById('listing_type');
+    const rentalDiv = document.getElementById('rentalFields');
+    const affiliateDiv = document.getElementById('affiliateFields');
+    function toggleFields() {
+      if (listingType.value === 'rental') {
+        rentalDiv.style.display = 'block';
+        affiliateDiv.style.display = 'none';
+      } else {
+        rentalDiv.style.display = 'none';
+        affiliateDiv.style.display = 'block';
+      }
+    }
+    listingType.addEventListener('change', toggleFields);
+    toggleFields();
+  </script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
