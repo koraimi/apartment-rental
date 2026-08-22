@@ -17,7 +17,6 @@ const i18n = (function() {
       currentLang = lang;
       localStorage.setItem('preferredLang', lang);
       
-      // Set RTL for Arabic
       if (lang === 'ar') {
         document.documentElement.setAttribute('dir', 'rtl');
         document.body.style.textAlign = 'right';
@@ -26,12 +25,7 @@ const i18n = (function() {
         document.body.style.textAlign = 'left';
       }
       
-      // Update HTML lang attribute (safe, doesn't break anything)
-      document.documentElement.lang = lang;
-      
-      // Trigger custom event for dynamic content update
       window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
-      
       return true;
     } catch (error) {
       console.error('Translation error:', error);

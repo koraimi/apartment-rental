@@ -1,4 +1,5 @@
-require('dotenv').config();
+
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -9,7 +10,7 @@ const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+app.set('trust proxy', 1);
 // ============ HELMET CONFIGURATION (Safe for file uploads) ============
 app.use(helmet({
   // Disable CSP for now (can be enabled later with proper config)

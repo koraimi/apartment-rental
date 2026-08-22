@@ -1,7 +1,5 @@
 // Apartment listing - with working filters and language switching
 
-let currentType = 'all';
-
 async function loadFilters() {
   try {
     const [neighborhoods, features] = await Promise.all([
@@ -62,13 +60,20 @@ async function loadApartments() {
   const priceRange = document.getElementById('priceFilter')?.value || '';
   
   let url = '/api/apartments?';
-  if (neighborhood) url += `neighborhood=${encodeURIComponent(neighborhood)}&`;
-  if (priceRange) url += `monthly_rent=${encodeURIComponent(priceRange)}&`;
-  if (selectedFeatures.length) {
+  
+  if (neighborhood && neighborhood !== '') {
+    url += `neighborhood=${encodeURIComponent(neighborhood)}&`;
+  }
+  if (priceRange && priceRange !== '') {
+    url += `monthly_rent=${encodeURIComponent(priceRange)}&`;
+  }
+  if (selectedFeatures.length > 0) {
     selectedFeatures.forEach(f => {
       url += `feature=${encodeURIComponent(f)}&`;
     });
   }
+  
+  console.log('Fetching URL:', url);
   
   const container = document.getElementById('apartmentsList');
   container.innerHTML = '<div class="text-center py-10"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
@@ -138,7 +143,7 @@ function escapeHtml(str) {
   return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m));
 }
 
-// Initialize when DOM is ready
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
   const searchBtn = document.getElementById('searchBtn');
   if (searchBtn) {
@@ -150,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Reload when language changes
 window.addEventListener('languageChanged', () => {
+  console.log('Language changed, reloading apartments...');
   loadApartments();
   loadFilters();
 });

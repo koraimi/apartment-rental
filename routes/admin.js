@@ -20,7 +20,7 @@ function verifyJWT(req, res, next) {
 }
 
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+const { username, password } = req.body;
   try {
     const result = await pool.query('SELECT password_hash FROM admins WHERE username = $1', [username]);
     if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
@@ -299,7 +299,7 @@ router.put('/listing-requests/:id/process', async (req, res) => {
     res.json({ message: 'Request marked as processed' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error' })
   }
 });
 
