@@ -1,278 +1,199 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
-const upload = require('../middleware/upload');
-const fs = require('fs');
-const path = require('path');
+const { addAffiliateParams } = require('../utils/affiliate');
+const { apiLimiter, submissionLimiter } = require('../middleware/rateLimiter');
 
-function verifyJWT(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
-  const token = authHeader.split(' ')[1];
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
-    req.user = decoded;
-    next();
-  });
-}
-
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// GET /api/apartments - list apartments with filters
+router.get('/apartments', apiLimiter, async (req, res) => {
   try {
-    const result = await pool.query('SELECT password_hash FROM admins WHERE username = $1', [username]);
-    if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
-    const valid = await bcrypt.compare(password, result.rows[0].password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.use(verifyJWT);
-
-router.get('/apartments', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id, name, neighborhood, monthly_rent, listing_type, is_featured FROM apartments ORDER BY id');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.post('/apartments', async (req, res) => {
-  const { name, neighborhood, monthly_rent, listing_type, external_booking_url, landlord_whatsapp, landlord_email, description, description_fr, description_ar, features } = req.body;
-  if (!name || !neighborhood || !monthly_rent) {
-    return res.status(400).json({ error: 'Name, neighborhood and monthly rent are required' });
-  }
-  try {
-    const duplicateCheck = await pool.query('SELECT id FROM apartments WHERE name = $1 AND neighborhood = $2', [name, neighborhood]);
-    if (duplicateCheck.rows.length > 0) {
-      return res.status(409).json({ error: 'An apartment with this name and neighborhood already exists.' });
-    }
-    const result = await pool.query(
-      `INSERT INTO apartments (name, neighborhood, monthly_rent, listing_type, external_booking_url, landlord_whatsapp, landlord_email, description, description_fr, description_ar)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-      [name, neighborhood, monthly_rent, listing_type || 'rental', external_booking_url || null, landlord_whatsapp || null, landlord_email || null, description || null, description_fr || null, description_ar || null]
-    );
-    const apartmentId = result.rows[0].id;
     
-    if (Array.isArray(features) && features.length) {
-      for (let featureName of features) {
-        const featureRes = await pool.query('SELECT id FROM features WHERE name = $1', [featureName]);
-        if (featureRes.rows.length) {
-          await pool.query('INSERT INTO apartment_features (apartment_id, feature_id) VALUES ($1, $2)', [apartmentId, featureRes.rows[0].id]);
+    
+    
+    const { neighborhood, feature, monthly_rent, type } = req.query;
+    
+    let query = `
+      SELECT 
+        a.id, a.name, a.neighborhood, a.monthly_rent, a.listing_type,
+        a.landlord_whatsapp, a.landlord_email, a.external_booking_url,
+        a.is_featured,
+        (SELECT photo_url FROM apartment_photos WHERE apartment_id = a.id ORDER BY sort_order LIMIT 1) as main_photo
+      FROM apartments a
+      WHERE 1=1
+    `;
+    
+    const params = [];
+    let paramCount = 0;
+    
+    // Neighborhood filter
+    if (neighborhood && neighborhood !== '' && neighborhood !== 'undefined') {
+      paramCount++;
+      params.push(`%${neighborhood}%`);
+      query += ` AND a.neighborhood ILIKE $${paramCount}`;
+      console.log(`Added neighborhood filter: ${neighborhood}`);
+    }
+    
+    // Monthly rent filter
+    if (monthly_rent && monthly_rent !== '' && monthly_rent !== 'undefined') {
+      paramCount++;
+      params.push(monthly_rent);
+      query += ` AND a.monthly_rent = $${paramCount}`;
+      
+    }
+    
+    // Listing type filter
+    if (type && type !== 'all' && type !== '' && type !== 'undefined') {
+      paramCount++;
+      params.push(type);
+      query += ` AND a.listing_type = $${paramCount}`;
+      
+    }
+    
+    // Feature filter
+    if (feature && feature !== '' && feature !== 'undefined') {
+      let features = Array.isArray(feature) ? feature : [feature];
+      for (let f of features) {
+        if (f && f !== '' && f !== 'undefined') {
+          paramCount++;
+          params.push(f);
+          query += ` AND EXISTS (
+            SELECT 1 FROM apartment_features af 
+            JOIN features ft ON af.feature_id = ft.id 
+            WHERE af.apartment_id = a.id AND ft.name = $${paramCount}
+          )`;
+      
         }
       }
     }
     
-    res.status(201).json({ id: apartmentId });
-  } catch (err) {
-    console.error(err);
-    if (err.code === '23505') return res.status(409).json({ error: 'Duplicate apartment.' });
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.put('/apartments/:id', async (req, res) => {
-  const id = req.params.id;
-  const { name, neighborhood, monthly_rent, listing_type, external_booking_url,
-          landlord_whatsapp, landlord_email, description, description_fr, description_ar,
-          features, is_featured, latitude, longitude } = req.body;
-
-  if (!name || !neighborhood || !monthly_rent) {
-    return res.status(400).json({ error: 'Name, neighborhood and monthly rent are required' });
-  }
-
-  try {
-    const duplicateCheck = await pool.query(
-      'SELECT id FROM apartments WHERE name = $1 AND neighborhood = $2 AND id != $3',
-      [name, neighborhood, id]
-    );
-    if (duplicateCheck.rows.length > 0) {
-      return res.status(409).json({ error: 'Another apartment with this name and neighborhood already exists.' });
-    }
-
-    await pool.query(
-      `UPDATE apartments SET 
-        name=$1, neighborhood=$2, monthly_rent=$3, listing_type=$4,
-        external_booking_url=$5, landlord_whatsapp=$6, landlord_email=$7,
-        description=$8, description_fr=$9, description_ar=$10,
-        is_featured=$11, latitude=$12, longitude=$13,
-        updated_at=CURRENT_TIMESTAMP
-       WHERE id=$14`,
-      [name, neighborhood, monthly_rent, listing_type, external_booking_url,
-       landlord_whatsapp, landlord_email, description || null, description_fr || null, description_ar || null,
-       is_featured || false, latitude || null, longitude || null, id]
-    );
-
-    await pool.query('DELETE FROM apartment_features WHERE apartment_id = $1', [id]);
-    if (Array.isArray(features) && features.length) {
-      for (let featureName of features) {
-        const fRes = await pool.query('SELECT id FROM features WHERE name = $1', [featureName]);
-        if (fRes.rows.length) {
-          await pool.query('INSERT INTO apartment_features (apartment_id, feature_id) VALUES ($1, $2)', [id, fRes.rows[0].id]);
-        }
+    query += ` ORDER BY a.is_featured DESC, a.id`;
+    
+    
+    
+    
+    const result = await pool.query(query, params);
+    
+    // Apply affiliate parameters
+    const processed = result.rows.map(apt => {
+      if (apt.listing_type === 'affiliate' && apt.external_booking_url) {
+        apt.external_booking_url = addAffiliateParams(apt.external_booking_url);
       }
-    }
-    res.json({ message: 'Apartment updated successfully' });
-  } catch (err) {
-    console.error(err);
-    if (err.code === '23505') return res.status(409).json({ error: 'Duplicate apartment.' });
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.patch('/apartments/:id/featured', async (req, res) => {
-  const id = req.params.id;
-  const { is_featured } = req.body;
-  try {
-    await pool.query('UPDATE apartments SET is_featured = $1 WHERE id = $2', [is_featured, id]);
-    if (is_featured) {
-      await pool.query(`INSERT INTO rental_payments (apartment_id, amount, duration_months, status) VALUES ($1, 50, 1, 'completed')`, [id]);
-    }
-    res.json({ message: `Featured status updated to ${is_featured}` });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.delete('/apartments/:id', async (req, res) => {
-  const id = req.params.id;
-  try {
-    await pool.query('DELETE FROM apartments WHERE id = $1', [id]);
-    res.json({ message: 'Apartment deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.post('/apartments/:id/photos', upload.single('photo'), async (req, res) => {
-  const aptId = req.params.id;
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const photoUrl = '/uploads/' + req.file.filename;
-  try {
-    const orderRes = await pool.query('SELECT COALESCE(MAX(sort_order), -1) + 1 as next_order FROM apartment_photos WHERE apartment_id = $1', [aptId]);
-    const sortOrder = orderRes.rows[0].next_order;
-    await pool.query('INSERT INTO apartment_photos (apartment_id, photo_url, sort_order) VALUES ($1, $2, $3)', [aptId, photoUrl, sortOrder]);
-    res.json({ photoUrl });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.delete('/photos/:id', async (req, res) => {
-  const photoId = req.params.id;
-  try {
-    const photoRes = await pool.query('SELECT photo_url FROM apartment_photos WHERE id = $1', [photoId]);
-    if (photoRes.rows.length) {
-      const filePath = path.join(__dirname, '../public', photoRes.rows[0].photo_url.replace(/^\//, ''));
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    }
-    await pool.query('DELETE FROM apartment_photos WHERE id = $1', [photoId]);
-    res.json({ message: 'Photo deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.get('/inquiries', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT i.id, i.name, i.email, i.phone, i.message, i.is_read, i.created_at, a.name as apartment_name
-      FROM landlord_inquiries i
-      JOIN apartments a ON i.apartment_id = a.id
-      ORDER BY i.is_read ASC, i.created_at DESC
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.put('/inquiries/:id/read', async (req, res) => {
-  const id = req.params.id;
-  try {
-    await pool.query('UPDATE landlord_inquiries SET is_read = TRUE WHERE id = $1', [id]);
-    res.json({ message: 'Inquiry marked as read' });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.get('/payments', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT p.*, a.name as apartment_name
-      FROM rental_payments p
-      JOIN apartments a ON p.apartment_id = a.id
-      ORDER BY p.created_at DESC
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.get('/stats', async (req, res) => {
-  try {
-    const totalRes = await pool.query('SELECT COUNT(*) FROM apartments');
-    const rentalRes = await pool.query("SELECT COUNT(*) FROM apartments WHERE listing_type = 'rental'");
-    const affiliateRes = await pool.query("SELECT COUNT(*) FROM apartments WHERE listing_type = 'affiliate'");
-    const featuredRes = await pool.query('SELECT COUNT(*) FROM apartments WHERE is_featured = true');
-    const inquiryRes = await pool.query('SELECT COUNT(*) FROM landlord_inquiries WHERE is_read = false');
-    const revenueRes = await pool.query("SELECT COALESCE(SUM(amount), 0) as total FROM rental_payments WHERE status = 'completed'");
-    res.json({
-      total_apartments: parseInt(totalRes.rows[0].count) || 0,
-      rental_listings: parseInt(rentalRes.rows[0].count) || 0,
-      affiliate_listings: parseInt(affiliateRes.rows[0].count) || 0,
-      featured_listings: parseInt(featuredRes.rows[0].count) || 0,
-      unread_inquiries: parseInt(inquiryRes.rows[0].count) || 0,
-      total_revenue: parseFloat(revenueRes.rows[0].total) || 0
+      return apt;
     });
+    
+    res.json(processed);
   } catch (err) {
-    console.error(err);
+    console.error('Error in /api/apartments:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.get('/listing-requests', async (req, res) => {
+// GET /api/apartments/:id - single apartment details
+router.get('/apartments/:id', apiLimiter, async (req, res) => {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS listing_requests (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL,
-        phone VARCHAR(50),
-        address TEXT,
-        listing_type VARCHAR(50),
-        message TEXT,
-        is_processed BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    const result = await pool.query(`
-      SELECT id, name, email, phone, address, listing_type, message, is_processed, created_at
-      FROM listing_requests
-      ORDER BY is_processed ASC, created_at DESC
-    `);
+    const aptId = req.params.id;
+    const lang = req.query.lang || 'en';
+    
+    const aptRes = await pool.query('SELECT * FROM apartments WHERE id = $1', [aptId]);
+    if (aptRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Apartment not found' });
+    }
+    const apartment = aptRes.rows[0];
+    
+    // Get features
+    const featuresRes = await pool.query(`
+      SELECT array_agg(f.name) as features
+      FROM features f
+      INNER JOIN apartment_features af ON f.id = af.feature_id
+      WHERE af.apartment_id = $1
+    `, [aptId]);
+    apartment.features = featuresRes.rows[0].features || [];
+    
+    // Language selection for description
+    let description = apartment.description || '';
+    if (lang === 'fr' && apartment.description_fr) {
+      description = apartment.description_fr;
+    } else if (lang === 'ar' && apartment.description_ar) {
+      description = apartment.description_ar;
+    }
+    apartment.description = description;
+    
+    // Get photos
+    const photosRes = await pool.query(
+      'SELECT id, photo_url FROM apartment_photos WHERE apartment_id = $1 ORDER BY sort_order',
+      [aptId]
+    );
+    apartment.photos = photosRes.rows;
+    
+    // Affiliate link processing
+    if (apartment.listing_type === 'affiliate' && apartment.external_booking_url) {
+      apartment.external_booking_url = addAffiliateParams(apartment.external_booking_url);
+    }
+    
+    res.json(apartment);
+  } catch (err) {
+    console.error('Error in /api/apartments/:id:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/neighborhoods
+router.get('/neighborhoods', apiLimiter, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT DISTINCT neighborhood FROM apartments ORDER BY neighborhood');
+    res.json(result.rows.map(r => r.neighborhood));
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/features
+router.get('/features', apiLimiter, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, name FROM features ORDER BY name');
     res.json(result.rows);
   } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/inquiry - send inquiry to landlord
+router.post('/inquiry', submissionLimiter, async (req, res) => {
+  const { apartment_id, name, email, phone, message } = req.body;
+  if (!apartment_id || !name || !email || !message) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  try {
+    const aptCheck = await pool.query('SELECT listing_type FROM apartments WHERE id = $1', [apartment_id]);
+    if (aptCheck.rows[0]?.listing_type !== 'rental') {
+      return res.status(400).json({ error: 'Inquiries only for rental listings' });
+    }
+    await pool.query(
+      `INSERT INTO landlord_inquiries (apartment_id, name, email, phone, message)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [apartment_id, name, email, phone || null, message]
+    );
+    res.status(201).json({ message: 'Inquiry sent to landlord!' });
+  } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.put('/listing-requests/:id/process', async (req, res) => {
-  const id = req.params.id;
+// POST /api/contact-owner - listing request
+router.post('/contact-owner', submissionLimiter, async (req, res) => {
+  const { name, email, phone, address, type, message } = req.body;
+  if (!name || !email || !phone) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
   try {
-    await pool.query('UPDATE listing_requests SET is_processed = TRUE WHERE id = $1', [id]);
-    res.json({ message: 'Request marked as processed' });
+    
+    await pool.query(
+      `INSERT INTO listing_requests (name, email, phone, address, listing_type, message)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [name, email, phone, address || null, type || null, message || null]
+    );
+    res.status(201).json({ message: 'Request sent! We will contact you soon.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
